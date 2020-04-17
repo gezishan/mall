@@ -32,5 +32,6 @@
     justify-content: space-around;
     align-items: center;
     background: #f7f7f8;
+    z-index: 10;
   }
 </style>

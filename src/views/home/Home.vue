@@ -3,94 +3,52 @@
         <Navbar class="home-nav">
             <template #center><span>首页</span></template>
         </Navbar>
-        <HomeSwiper :bannerList="banners"></HomeSwiper>
-        <HomeRecommends :recommendList="recommends"></HomeRecommends>
-        <div class="feature">
-            <a href="https://act.mogujie.com/zzlx67">
-                <img src="~assets/images/home/recommend_bg.jpg" alt="">
-            </a>
-        </div>
-        <TabControl class="tab-control" :titles="['流行', '新款', '精选']" @tabClick="tabClick" />
-        <GoodsList :goods="showGoods" />
-        <ul>
-            <li>li1</li>
-            <li>li2</li>
-            <li>li3</li>
-            <li>li4</li>
-            <li>li5</li>
-            <li>li6</li>
-            <li>li7</li>
-            <li>li8</li>
-            <li>li9</li>
-            <li>li10</li>
-            <li>li11</li>
-            <li>li12</li>
-            <li>li13</li>
-            <li>li14</li>
-            <li>li15</li>
-            <li>li16</li>
-            <li>li17</li>
-            <li>li18</li>
-            <li>li19</li>
-            <li>li20</li><li>li1</li>
-            <li>li2</li>
-            <li>li3</li>
-            <li>li4</li>
-            <li>li5</li>
-            <li>li6</li>
-            <li>li7</li>
-            <li>li8</li>
-            <li>li9</li>
-            <li>li10</li>
-            <li>li11</li>
-            <li>li12</li>
-            <li>li13</li>
-            <li>li14</li>
-            <li>li15</li>
-            <li>li16</li>
-            <li>li17</li>
-            <li>li18</li>
-            <li>li19</li>
-            <li>li20</li><li>li1</li>
-            <li>li2</li>
-            <li>li3</li>
-            <li>li4</li>
-            <li>li5</li>
-            <li>li6</li>
-            <li>li7</li>
-            <li>li8</li>
-            <li>li9</li>
-            <li>li10</li>
-            <li>li11</li>
-            <li>li12</li>
-            <li>li13</li>
-            <li>li14</li>
-            <li>li15</li>
-            <li>li16</li>
-            <li>li17</li>
-            <li>li18</li>
-            <li>li19</li>
-            <li>li20</li>
-        </ul>
+        <Scroll class="scroll-content" ref="scroll">
+            <HomeSwiper :bannerList="banners"></HomeSwiper>
+            <HomeRecommends :recommendList="recommends"></HomeRecommends>
+            <div class="feature">
+                <a href="https://act.mogujie.com/zzlx67">
+                    <img src="~assets/images/home/recommend_bg.jpg" alt="">
+                </a>
+            </div>
+            <TabControl class="tab-control" :titles="['流行', '新款', '精选']" @tabClick="tabClick" />
+            <GoodsList :goods="showGoods" />
+            <div class="goodList">
+                <ul>
+                    <li v-for="(item, index) in goodsLocalList" :key="index">
+                        <a :href="item.link">
+                            <div><img :src="item.img" alt=""></div>
+                            <p>{{item.title}}</p>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </Scroll>
+        <BackTop @click.native="backtop" />
     </div>
 </template>
 
 <script>
 import Navbar from 'components/common/navbar/Navbar'
+import Scroll from 'components/common/scroll/Scroll'
 import TabControl from 'components/content/tabControl/TabControl'
 import GoodsList from 'components/content/goods/GoodsList'
+import BackTop from 'components/content/backTop/BackTop'
 
 import HomeSwiper from './childComps/HomeSwiper'
 import HomeRecommends from './childComps/HomeRecommends'
 
 import {getHomeData, getHomeGoods} from 'network/home'
+import goodsLocalData from 'network/goodsListData'  //本地数据
 
 export default {
     name: 'Home',
     components: {
         Navbar,
+        Scroll,
         TabControl,
         GoodsList,
+        BackTop,
         HomeSwiper,
         HomeRecommends
     },
@@ -103,7 +61,8 @@ export default {
                 "new": {page: 0, list: []},
                 "sell": {page: 0, list: []},
             },
-            curType: 'pop'
+            curType: 'pop',
+            goodsLocalList: []  //本地数据
         }
     },
     computed:{
@@ -119,6 +78,10 @@ export default {
             // console.log(index)
             this.curType = Object.keys(this.goods)[index]
             console.log(this.curType)
+        },
+
+        backtop(){
+            this.$refs.scroll.scrollTo(0, 0, 500)
         },
 
         /*
@@ -149,16 +112,21 @@ export default {
     created(){
         this.getHomeData() 
         // 商品数据
-        this.getHomeGoods('pop')
-        this.getHomeGoods('new')
-        this.getHomeGoods('sell')
+        // this.getHomeGoods('pop')
+        // this.getHomeGoods('new')
+        // this.getHomeGoods('sell')
+        // 本地数据
+        this.goodsLocalList = goodsLocalData.result
     }
 }
 </script>
 
 <style lang="less" scoped>
     #home{
-        padding: 45px 0 49px;
+        position: relative;
+        width: 100%;
+        height: 100vh;
+        overflow: hidden;
     }
     .home-nav{
         position: fixed;
@@ -168,6 +136,18 @@ export default {
         color: #fff;
         background: #ff8e96;
         z-index: 10;
+    }
+    .scroll-content{
+        /* position: absolute;
+        top: 45px;
+        bottom: 49px;
+        left: 0;
+        right: 0;
+        overflow: hidden; */
+
+        height: calc(100% - 94px);
+        margin-top: 45px;
+        overflow: hidden;
     }
     .feature{
         width: 100%;
@@ -181,6 +161,26 @@ export default {
         top: 45px;
         background: #fff;
         z-index: 9;
+    }
+    .goodList{
+        width: 100%;
+        ul{
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            align-items: center;
+            li{
+                width: 45%;
+                a{
+                    font-size: 14px;
+                    color: #333;
+                    text-decoration: none;
+                }
+                p{
+                    padding: 5px 0 10px;
+                }
+            }
+        }
     }
 </style>
 
