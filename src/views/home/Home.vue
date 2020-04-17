@@ -38,8 +38,7 @@ import BackTop from 'components/content/backTop/BackTop'
 import HomeSwiper from './childComps/HomeSwiper'
 import HomeRecommends from './childComps/HomeRecommends'
 
-import {getHomeData, getHomeGoods} from 'network/home'
-import goodsLocalData from 'network/goodsListData'  //本地数据
+import {getHomeData, getHomeGoods, getLocalHomeGoods} from 'network/home'
 
 export default {
     name: 'Home',
@@ -107,16 +106,26 @@ export default {
             }, err => {
                 console.log(err);
             })
+        },
+        getLocalHomeGoods(){
+            getLocalHomeGoods().then(res => {
+                // console.log(res)
+                this.goodsLocalList = res.result
+            }, err => {
+                console.log(err)
+            })
         }
     },
     created(){
         this.getHomeData() 
+
         // 商品数据
         // this.getHomeGoods('pop')
         // this.getHomeGoods('new')
         // this.getHomeGoods('sell')
+
         // 本地数据
-        this.goodsLocalList = goodsLocalData.result
+        this.getLocalHomeGoods()
     }
 }
 </script>
