@@ -3,7 +3,12 @@
         <Navbar class="home-nav">
             <template #center><span>首页</span></template>
         </Navbar>
-        <Scroll class="scroll-content" ref="scroll">
+        <Scroll class="scroll-content" 
+                ref="scroll" 
+                :probeType="3" 
+                :pullUpLoad="true"
+                @scroll="contentScroll" 
+                @pullingUp="loadMore">
             <HomeSwiper :bannerList="banners"></HomeSwiper>
             <HomeRecommends :recommendList="recommends"></HomeRecommends>
             <div class="feature">
@@ -13,9 +18,10 @@
             </div>
             <TabControl class="tab-control" :titles="['流行', '新款', '精选']" @tabClick="tabClick" />
             <GoodsList :goods="showGoods" />
+            <!-- 本地数据 -->
             <div class="goodList">
                 <ul>
-                    <li v-for="(item, index) in goodsLocalList" :key="index">
+                    <li v-for="(item, index) in localShowList" :key="index">
                         <a :href="item.link">
                             <div><img :src="item.img" alt=""></div>
                             <p>{{item.title}}</p>
@@ -24,7 +30,7 @@
                 </ul>
             </div>
         </Scroll>
-        <BackTop @click.native="backtop" />
+        <BackTop @click.native="backtop" v-show="isBacktopShow" />
     </div>
 </template>
 
@@ -61,7 +67,10 @@ export default {
                 "sell": {page: 0, list: []},
             },
             curType: 'pop',
-            goodsLocalList: []  //本地数据
+            goodsLocalList: [],  //本地数据
+            localShowList: [],
+            localCurPage: 0,
+            isBacktopShow: false
         }
     },
     computed:{
@@ -81,6 +90,24 @@ export default {
 
         backtop(){
             this.$refs.scroll.scrollTo(0, 0, 500)
+        },
+
+        contentScroll(pos){
+            // console.log(pos)
+            this.isBacktopShow = -pos.y >= 600
+        },
+
+        loadMore(){
+            console.log('上拉加载更多')
+            // 请求数据
+            // this.getHomeGoods(this.curType)
+
+            // 本地数据
+            let page = this.localCurPage + 1
+            if(page*10 >= this.goodsLocalList.length) return
+            this.localShowList.push(...this.goodsLocalList.slice(page*10, page*10+10))
+            this.localCurPage += 1
+            this.$refs.scroll.finishPullUp()
         },
 
         /*
@@ -103,6 +130,8 @@ export default {
                 /* let listArr = res.data.list
                 this.goods[type].list.push(...listArr)
                 this.goods[type].page += 1 */
+
+                this.$refs.scroll.finishPullUp()
             }, err => {
                 console.log(err);
             })
@@ -111,6 +140,7 @@ export default {
             getLocalHomeGoods().then(res => {
                 // console.log(res)
                 this.goodsLocalList = res.result
+                this.localShowList.push(...this.goodsLocalList.slice(0,10))
             }, err => {
                 console.log(err)
             })
@@ -123,6 +153,12 @@ export default {
         // this.getHomeGoods('pop')
         // this.getHomeGoods('new')
         // this.getHomeGoods('sell')
+
+        // 监听item图片加载完成
+        this.$bus.$on('itemImageLoad', () => {
+            console.log('itemImageLoad')
+            this.$refs.scroll.refresh()
+        })
 
         // 本地数据
         this.getLocalHomeGoods()
