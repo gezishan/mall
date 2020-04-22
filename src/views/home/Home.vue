@@ -3,27 +3,35 @@
         <Navbar class="home-nav">
             <template #center><span>首页</span></template>
         </Navbar>
+        <TabControl class="tab-control-top" 
+                    :titles="['流行', '新款', '精选']" 
+                    @tabClick="tabClick" 
+                    ref="tabControl2"
+                    v-show="isTabShow" />
         <Scroll class="scroll-content" 
                 ref="scroll" 
                 :probeType="3" 
                 :pullUpLoad="true"
                 @scroll="contentScroll" 
                 @pullingUp="loadMore">
-            <HomeSwiper :bannerList="banners"></HomeSwiper>
-            <HomeRecommends :recommendList="recommends"></HomeRecommends>
+            <HomeSwiper :bannerList="banners" @swiperImageLoad="swiperImageLoad"></HomeSwiper>
+            <HomeRecommends :recommendList="recommends" @recomendImageLoad="recomendImageLoad"></HomeRecommends>
             <div class="feature">
                 <a href="https://act.mogujie.com/zzlx67">
                     <img src="~assets/images/home/recommend_bg.jpg" alt="">
                 </a>
             </div>
-            <TabControl class="tab-control" :titles="['流行', '新款', '精选']" @tabClick="tabClick" />
+            <TabControl class="tab-control" 
+                        :titles="['流行', '新款', '精选']" 
+                        @tabClick="tabClick" 
+                        ref="tabControl" />
             <GoodsList :goods="showGoods" />
             <!-- 本地数据 -->
             <div class="goodList">
                 <ul>
                     <li v-for="(item, index) in localShowList" :key="index">
                         <a :href="item.link">
-                            <div><img :src="item.img" alt=""></div>
+                            <div><img :src="item.img" @load="imageLoad"></div>
                             <p>{{item.title}}</p>
                         </a>
                     </li>
@@ -45,6 +53,7 @@ import HomeSwiper from './childComps/HomeSwiper'
 import HomeRecommends from './childComps/HomeRecommends'
 
 import {getHomeData, getHomeGoods, getLocalHomeGoods} from 'network/home'
+import {debounce} from 'common/utils'
 
 export default {
     name: 'Home',
@@ -70,7 +79,11 @@ export default {
             goodsLocalList: [],  //本地数据
             localShowList: [],
             localCurPage: 0,
-            isBacktopShow: false
+            isBacktopShow: false,
+            tabOffsetTop: 0,
+            isSwiperImageLoad: false,
+            isRecomendImageLoad: false,
+            isTabShow: false
         }
     },
     computed:{
@@ -86,6 +99,8 @@ export default {
             // console.log(index)
             this.curType = Object.keys(this.goods)[index]
             console.log(this.curType)
+            this.$refs.tabControl.curIndex = index
+            this.$refs.tabControl2.curIndex = index
         },
 
         backtop(){
@@ -93,8 +108,12 @@ export default {
         },
 
         contentScroll(pos){
+            // 回到顶部是否显示
             // console.log(pos)
             this.isBacktopShow = -pos.y >= 600
+
+            // tabbar是否吸顶
+            this.isTabShow = -pos.y+45 >= this.tabOffsetTop
         },
 
         loadMore(){
@@ -108,6 +127,27 @@ export default {
             this.localShowList.push(...this.goodsLocalList.slice(page*10, page*10+10))
             this.localCurPage += 1
             this.$refs.scroll.finishPullUp()
+        },
+
+        imageLoad(){
+            this.$bus.$emit('itemImageLoad')
+        },
+        swiperImageLoad(){
+            // console.log(this.$refs.tabControl.$el.offsetTop)
+            this.isSwiperImageLoad = true
+            if(this.isRecomendImageLoad){
+                console.log(this.$refs.tabControl.$el.offsetTop)
+                this.tabOffsetTop = this.$refs.tabControl.$el.offsetTop
+            }
+            
+        },
+        recomendImageLoad(){
+            this.isRecomendImageLoad = true
+            if(this.isSwiperImageLoad){
+                console.log(this.$refs.tabControl.$el.offsetTop)
+                this.tabOffsetTop = this.$refs.tabControl.$el.offsetTop
+            }
+            
         },
 
         /*
@@ -154,14 +194,16 @@ export default {
         // this.getHomeGoods('new')
         // this.getHomeGoods('sell')
 
-        // 监听item图片加载完成
-        this.$bus.$on('itemImageLoad', () => {
-            console.log('itemImageLoad')
-            this.$refs.scroll.refresh()
-        })
-
         // 本地数据
         this.getLocalHomeGoods()
+    },
+    mounted(){
+        // 监听item图片加载完成
+        const refresh = debounce(this.$refs.scroll.refresh, 200)
+        this.$bus.$on('itemImageLoad', () => {
+            // console.log('itemImageLoad')
+            refresh()
+        })
     }
 }
 </script>
@@ -181,6 +223,13 @@ export default {
         color: #fff;
         background: #ff8e96;
         z-index: 10;
+    }
+    .tab-control-top{
+        position: fixed;
+        top: 45px;
+        left: 0;
+        right: 0;
+        width: 100%;
     }
     .scroll-content{
         /* position: absolute;
@@ -202,8 +251,8 @@ export default {
         }
     }
     .tab-control{
-        position: sticky;
-        top: 45px;
+        // position: sticky;
+        // top: 45px;
         background: #fff;
         z-index: 9;
     }

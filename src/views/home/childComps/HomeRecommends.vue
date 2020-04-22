@@ -3,6 +3,7 @@
         <div v-for="(item, index) in recommendList" :key="index" class="recommend-item"> 
             <a :href="item.link">
                 <div><img :src="item.image" @load="imageLoad"></div>
+                <!-- <div><img :src="item.image"></div> -->
                 <p>{{item.title}}</p>
             </a>
         </div>
@@ -21,9 +22,17 @@ export default {
             }
         }
     },
+    data(){
+        return{
+            isLoad: false
+        }
+    },
     methods: {
         imageLoad(){
-            this.$bus.$emit('itemImageLoad')
+            if(!this.isLoad){
+                this.$emit('recomendImageLoad')
+                this.isLoad = true
+            }
         }
     }
 }
