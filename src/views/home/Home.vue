@@ -27,16 +27,14 @@
                         ref="tabControl" />
             <GoodsList :goods="showGoods" />
             <!-- 本地数据 -->
-            <div class="goodList">
+            <!-- <div class="goodList">
                 <ul>
-                    <li v-for="(item, index) in localShowList" :key="index">
-                        <a :href="item.link">
-                            <div><img :src="item.img" @load="imageLoad"></div>
-                            <p>{{item.title}}</p>
-                        </a>
+                    <li v-for="(item, index) in localShowList" :key="index" @click="detailClick(item.iid)">
+                        <div><img :src="item.img" @load="imageLoad"></div>
+                        <p>{{item.title}}</p>
                     </li>
                 </ul>
-            </div>
+            </div> -->
         </Scroll>
         <BackTop @click.native="backtop" v-show="isBacktopShow" />
     </div>
@@ -83,7 +81,8 @@ export default {
             tabOffsetTop: 0,
             isSwiperImageLoad: false,
             isRecomendImageLoad: false,
-            isTabShow: false
+            isTabShow: false,
+            saveY: 0
         }
     },
     computed:{
@@ -98,7 +97,7 @@ export default {
         tabClick(index){
             // console.log(index)
             this.curType = Object.keys(this.goods)[index]
-            console.log(this.curType)
+            // console.log(this.curType)
             this.$refs.tabControl.curIndex = index
             this.$refs.tabControl2.curIndex = index
         },
@@ -119,24 +118,23 @@ export default {
         loadMore(){
             console.log('上拉加载更多')
             // 请求数据
-            // this.getHomeGoods(this.curType)
+            this.getHomeGoods(this.curType)
 
             // 本地数据
-            let page = this.localCurPage + 1
+            /* let page = this.localCurPage + 1
             if(page*10 >= this.goodsLocalList.length) return
             this.localShowList.push(...this.goodsLocalList.slice(page*10, page*10+10))
             this.localCurPage += 1
-            this.$refs.scroll.finishPullUp()
+            this.$refs.scroll.finishPullUp() */
         },
 
         imageLoad(){
             this.$bus.$emit('itemImageLoad')
         },
         swiperImageLoad(){
-            // console.log(this.$refs.tabControl.$el.offsetTop)
             this.isSwiperImageLoad = true
             if(this.isRecomendImageLoad){
-                console.log(this.$refs.tabControl.$el.offsetTop)
+                // console.log(this.$refs.tabControl.$el.offsetTop)
                 this.tabOffsetTop = this.$refs.tabControl.$el.offsetTop
             }
             
@@ -144,10 +142,15 @@ export default {
         recomendImageLoad(){
             this.isRecomendImageLoad = true
             if(this.isSwiperImageLoad){
-                console.log(this.$refs.tabControl.$el.offsetTop)
+                // console.log(this.$refs.tabControl.$el.offsetTop)
                 this.tabOffsetTop = this.$refs.tabControl.$el.offsetTop
             }
             
+        },
+
+        detailClick(id){
+            // console.log(id)
+            this.$router.push('/detail/' + id)
         },
 
         /*
@@ -165,12 +168,10 @@ export default {
         getHomeGoods(type){
             let page = this.goods[type].page + 1
             getHomeGoods(type, page).then(res => {
-                console.log(res)
-                // 暂无接口
-                /* let listArr = res.data.list
+                // console.log(res)
+                let listArr = res.result.wall.list
                 this.goods[type].list.push(...listArr)
-                this.goods[type].page += 1 */
-
+                this.goods[type].page += 1
                 this.$refs.scroll.finishPullUp()
             }, err => {
                 console.log(err);
@@ -190,12 +191,12 @@ export default {
         this.getHomeData() 
 
         // 商品数据
-        // this.getHomeGoods('pop')
-        // this.getHomeGoods('new')
-        // this.getHomeGoods('sell')
+        this.getHomeGoods('pop')
+        this.getHomeGoods('new')
+        this.getHomeGoods('sell')
 
         // 本地数据
-        this.getLocalHomeGoods()
+        // this.getLocalHomeGoods()
     },
     mounted(){
         // 监听item图片加载完成
@@ -204,6 +205,15 @@ export default {
             // console.log('itemImageLoad')
             refresh()
         })
+    },
+    destroyed(){
+        console.log('home destroyed')
+    },
+    deactivated(){
+        this.saveY = this.$refs.scroll.scrollY
+    },
+    activated(){
+        this.$refs.scroll.scrollTo(0, this.saveY, 0)
     }
 }
 </script>

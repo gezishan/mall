@@ -5,6 +5,7 @@ const Home = () => import('views/home/Home')
 const Done = () => import('views/done/Done')
 const Recruit = () => import('views/recruit/Recruit')
 const Me = () => import('views/mine/Me')
+const Detail = () => import('views/detail/Detail')
 
 Vue.use(Router)
 
@@ -39,6 +40,13 @@ const routes = [
     component: Me,
     meta: {
       title: '个人中心'
+    }
+  },
+  {
+    path: '/detail/:id',
+    component: Detail,
+    meta: {
+      title: '详情'
     }
   }
 ]

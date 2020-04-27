@@ -1,5 +1,5 @@
 <template>
-    <div class="recommend">
+    <div class="recommend" @click="itemClick">
         <div v-for="(item, index) in recommendList" :key="index" class="recommend-item"> 
             <a :href="item.link">
                 <div><img :src="item.image" @load="imageLoad"></div>
@@ -33,6 +33,9 @@ export default {
                 this.$emit('recomendImageLoad')
                 this.isLoad = true
             }
+        },
+        itemClick(){
+            console.log('跳转到详情页')
         }
     }
 }

@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <router-view/>
+    <keep-alive><router-view/></keep-alive>
     <TabBar>
       <TabItem link="/home">
         <template #tab-img><img src="~assets/images/tabbar/icon_home.png"></template>

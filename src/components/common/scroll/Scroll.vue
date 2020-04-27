@@ -27,6 +27,11 @@ export default {
             scroll: null
         }
     },
+    computed:{
+        scrollY(){
+            return this.scroll.y
+        }
+    },
     methods:{
         scrollTo(x, y, time=300){
             this.scroll && this.scroll.scrollTo(x, y, time)
@@ -36,7 +41,7 @@ export default {
             this.scroll && this.scroll.finishPullUp()
         },
         refresh(){
-            console.log('refresh11')
+            // console.log('refresh11')
             this.scroll && this.scroll.refresh()
         }
     },

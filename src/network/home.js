@@ -1,4 +1,4 @@
-import {request, localRequest} from './request'
+import {request, goodsMogujie, localRequest} from './request'
 
 export function getHomeData(){
     return request({
@@ -7,12 +7,13 @@ export function getHomeData(){
     })
 }
 
-export function getHomeGoods(type, page){
-    return request({
-        url: '/home/data',
+export function getHomeGoods(sort, page){
+    return goodsMogujie({
+        url: '/api/search',
         params: {
-            type,
-            page
+            sort,
+            page,
+            // callback: 'jsonp1'
         }
     })
 }

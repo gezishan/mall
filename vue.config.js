@@ -20,17 +20,18 @@ module.exports = {
         port: 8080,
         https: false,
         hotOnly: false,
-        proxy: {
-            // 配置跨域
-            '/api': {
-                target: 'https://www.baidu.com/api',
-                ws: true,
-                changeOrigin: true,
-                pathRewrite: {
-                    '^/api': ''
-                }
-            }
-        },
+        // proxy: {
+        //     // 配置跨域
+        //     '/api': {
+        //         target: 'https://list.mogu.com',
+        //         ws: true,   //如果要代理 websockets，配置这个参数
+        //         secure: true,  // false为http访问，true为https访问
+        //         changeOrigin: true,   //是否跨域
+        //         pathRewrite: {
+        //             '^/api': ''
+        //         }
+        //     }
+        // },
         before(app) {
             // http://localhost:8080/goods
             app.get('/goods', (req, res) => {
