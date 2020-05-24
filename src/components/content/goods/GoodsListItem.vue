@@ -30,8 +30,8 @@ export default {
             this.$bus.$emit('itemImageLoad')
         },
         detailClick(id){
-            console.log(id)
-            this.$router.push('/detail/' + id)
+            this.$toast.show(id)
+            // this.$router.push('/detail/' + id)
         }
     }
 }
